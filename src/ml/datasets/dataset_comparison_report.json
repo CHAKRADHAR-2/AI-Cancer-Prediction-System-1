@@ -1,0 +1,16 @@
+{
+  "dataset_stats": {
+    "breast_cancer_wisconsin": {
+      "shape": [
+        699,
+        11
+      ],
+      "missing_values": "0",
+      "numeric_features": 10,
+      "categorical_features": 1,
+      "cancer_prevalence": 2.6895565092989986
+    }
+  },
+  "feature_comparison": {},
+  "distribution_analysis": {}
+}
