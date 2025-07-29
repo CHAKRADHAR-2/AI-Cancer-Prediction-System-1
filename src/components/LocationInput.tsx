@@ -213,11 +213,16 @@ export function LocationInput({ onLocationSet, isLoading }: LocationInputProps) 
 
         {/* Location Helper */}
         <div className="p-3 bg-muted rounded-lg text-sm">
-          <p className="font-medium mb-1">📍 Enhanced Location Detection</p>
-          <p className="text-muted-foreground">
-            We've improved our location detection system for better accuracy. 
-            The "Use Current Location" feature now provides more precise results for your area.
+          <p className="font-medium mb-1">📍 Enhanced GPS Location Detection</p>
+          <p className="text-muted-foreground mb-2">
+            Our enhanced GPS system now provides accurate city/village detection using:
           </p>
+          <ul className="text-xs text-muted-foreground space-y-1 ml-4">
+            <li>• External geocoding APIs for maximum accuracy</li>
+            <li>• Comprehensive database of 500+ cities, towns & villages</li>
+            <li>• Precise coordinate-based location matching</li>
+            <li>• Multi-layer fallback system for reliability</li>
+          </ul>
         </div>
       </CardContent>
     </Card>

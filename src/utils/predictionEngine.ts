@@ -52,7 +52,8 @@ export class CancerPredictionEngine {
       (current && current.confidence > (highest?.confidence || 0)) ? current : highest
     , null);
 
-    if (highestScoringCancer && highestScoringCancer.confidence >= 60) {
+    // STRICT: Require 75% confidence for cancer detection
+    if (highestScoringCancer && highestScoringCancer.confidence >= 75) {
       return highestScoringCancer;
     }
 
@@ -152,6 +153,27 @@ export class CancerPredictionEngine {
   }
 
   private static performGeneralRiskAssessment(patientData: PatientData, healthMetrics: any): CancerPrediction {
+    // STRICT: Check if patient appears healthy first
+    const symptomCount = [
+      patientData.unexplainedWeightLoss,
+      patientData.persistentFatigue,
+      patientData.unusualBleeding,
+      patientData.persistentCough,
+      patientData.skinChanges,
+      patientData.digestiveIssues
+    ].filter(Boolean).length;
+    
+    // If no physical indicators and minimal symptoms, patient is likely healthy
+    if (!patientData.tumorSize && !patientData.lymphNodes && !patientData.metastasis && symptomCount < 2) {
+      return {
+        cancerType: 'No Cancer Detected',
+        confidence: 85,
+        riskLevel: 'Low',
+        stage: '',
+        detectedAt: new Date().toISOString()
+      };
+    }
+
     const totalRiskScore = (
       healthMetrics.cancerRiskFactors * 40 +
       healthMetrics.symptomSeverity * 30 +
@@ -165,28 +187,27 @@ export class CancerPredictionEngine {
     
     // Strong indicators of good health
     if (healthMetrics.overallHealth > 0.8 && healthMetrics.symptomSeverity < 0.3) {
-      confidence = Math.max(confidence - 40, 15);
       return {
         cancerType: 'No Cancer Detected',
-        confidence: Math.min(95 - confidence, 90), // Invert for "no cancer" confidence
+        confidence: Math.min(95 - confidence, 90),
         riskLevel: 'Low',
-        stage: '', // Empty stage for no cancer
+        stage: '',
         detectedAt: new Date().toISOString()
       };
     }
 
-    // Moderate risk assessment
-    if (confidence < 40) {
+    // STRICT: Require high confidence (75%+) for cancer detection
+    if (confidence < 75) {
       return {
         cancerType: 'No Cancer Detected',
-        confidence: Math.min(85 - confidence, 85),
+        confidence: Math.min(90 - confidence, 85),
         riskLevel: 'Low',
-        stage: '', // Empty stage for no cancer
+        stage: '',
         detectedAt: new Date().toISOString()
       };
     }
 
-    // If risk is moderate to high, assign most likely cancer type
+    // Only assign cancer type if confidence is very high
     const likelyCancerType = this.determineMostLikelyCancerType(patientData);
     const stage = this.getAccurateStaging(patientData);
     

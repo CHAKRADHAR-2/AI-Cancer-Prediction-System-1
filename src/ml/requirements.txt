@@ -29,6 +29,9 @@ pydantic>=1.10.0
 jupyter>=1.0.0
 ipykernel>=6.15.0
 
+# Explainable AI
+shap>=0.42.0
+
 # Development Tools
 pytest>=7.1.0
 black>=22.0.0

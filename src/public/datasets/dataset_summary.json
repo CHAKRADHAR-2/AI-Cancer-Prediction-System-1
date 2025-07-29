@@ -1,0 +1,49 @@
+{
+  "generation_date": "2025-07-28T21:48:39.271877",
+  "total_datasets": 6,
+  "comprehensive_dataset": {
+    "filename": "comprehensive_multi_cancer_dataset.csv",
+    "samples": 5000,
+    "features": 37,
+    "cancer_distribution": {
+      "Breast Cancer": 2336,
+      "No Cancer": 1513,
+      "Lung Cancer": 697,
+      "Prostate Cancer": 246,
+      "Colon Cancer": 107,
+      "Skin Cancer (Melanoma)": 101
+    }
+  },
+  "cancer_specific_datasets": {
+    "Breast Cancer": {
+      "filename": "breast_cancer_dataset.csv",
+      "samples": 3336,
+      "cancer_cases": 2336,
+      "features": 37
+    },
+    "Lung Cancer": {
+      "filename": "lung_cancer_dataset.csv",
+      "samples": 1394,
+      "cancer_cases": 697,
+      "features": 37
+    },
+    "Colon Cancer": {
+      "filename": "colon_cancer_dataset.csv",
+      "samples": 214,
+      "cancer_cases": 107,
+      "features": 37
+    },
+    "Prostate Cancer": {
+      "filename": "prostate_cancer_dataset.csv",
+      "samples": 492,
+      "cancer_cases": 246,
+      "features": 37
+    },
+    "Skin Cancer (Melanoma)": {
+      "filename": "skin_cancer_melanoma_dataset.csv",
+      "samples": 202,
+      "cancer_cases": 101,
+      "features": 37
+    }
+  }
+}

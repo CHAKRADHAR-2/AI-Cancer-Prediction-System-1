@@ -3,9 +3,10 @@ import { PatientForm } from '@/components/PatientForm';
 import { PredictionResults } from '@/components/PredictionResults';
 import { HospitalFinder } from '@/components/HospitalFinder';
 import { AppointmentViewer } from '@/components/AppointmentViewer';
+import { DatasetViewer } from '@/components/DatasetViewer';
 import { UserMenu } from '@/components/UserMenu';
 import { PatientData, PredictionResult } from '@/types/healthcare';
-import { CancerPredictionEngine } from '@/utils/predictionEngine';
+import { EnhancedCancerPredictionEngine } from '@/utils/enhancedPredictionEngine';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -26,7 +27,7 @@ const Index: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       console.log('Analyzing patient data:', patientData);
-      const result = CancerPredictionEngine.predict(patientData);
+      const result = EnhancedCancerPredictionEngine.predict(patientData);
       
       console.log('Prediction result:', result);
       setPredictionResult(result);
@@ -140,10 +141,14 @@ const Index: React.FC = () => {
 
             {/* Tabs for different sections */}
             <Tabs defaultValue="assessment" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsList className="grid w-full grid-cols-3 mb-8">
                 <TabsTrigger value="assessment" className="flex items-center gap-2">
                   <Stethoscope className="h-4 w-4" />
                   Health Assessment
+                </TabsTrigger>
+                <TabsTrigger value="datasets" className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Cancer Datasets
                 </TabsTrigger>
                 <TabsTrigger value="appointments" className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
@@ -153,6 +158,10 @@ const Index: React.FC = () => {
               
               <TabsContent value="assessment">
                 <PatientForm onSubmit={handlePrediction} isLoading={loading} />
+              </TabsContent>
+              
+              <TabsContent value="datasets">
+                <DatasetViewer />
               </TabsContent>
               
               <TabsContent value="appointments">

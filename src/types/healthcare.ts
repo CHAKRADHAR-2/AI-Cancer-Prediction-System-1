@@ -99,6 +99,28 @@ export interface PrognosisInfo {
   timeframe: string;
 }
 
+export interface SHAPExplanation {
+  explanationType: 'SHAP-like' | 'Feature Importance';
+  baselineProbability: number;
+  predictedProbability: number;
+  prediction: string;
+  totalFeatures: number;
+  featureContributions: FeatureContribution[];
+  topRiskFactors: FeatureContribution[];
+  topProtectiveFactors: FeatureContribution[];
+  summary: string;
+}
+
+export interface FeatureContribution {
+  feature: string;
+  featureKey: string;
+  shapValue: number;
+  featureValue: number;
+  contributionPct: number;
+  impact: 'Increases Risk' | 'Decreases Risk';
+  magnitude: 'High' | 'Medium' | 'Low';
+}
+
 export interface PredictionResult {
   prediction: CancerPrediction;
   medications: Medication[];
@@ -107,4 +129,5 @@ export interface PredictionResult {
   nutritionRecommendations: NutritionRecommendation[];
   appointmentRecommendation: AppointmentRecommendation;
   prognosis: PrognosisInfo;
+  shapExplanation?: SHAPExplanation;
 }
