@@ -1,3 +1,4 @@
+import { comprehensiveCancerHospitals, getCancerHospitalsByState, getAllCancerHospitals, searchCancerHospitals, CancerHospitalData } from '../data/comprehensiveCancerHospitals';
 
 export interface HospitalData {
   id: string;
@@ -21,6 +22,27 @@ export interface HospitalData {
 
 export class HospitalDataService {
   static getHospitalsByState(state: string, cancerType: string): HospitalData[] {
+    // First try to get hospitals from comprehensive cancer database
+    const cancerHospitals = getCancerHospitalsByState(state);
+    
+    if (cancerHospitals.length > 0) {
+      // Filter by cancer type if specified and not generic
+      if (cancerType && cancerType !== 'Oncology' && cancerType !== 'General') {
+        const filtered = cancerHospitals.filter(hospital => 
+          hospital.specializations.some(spec => 
+            spec.toLowerCase().includes(cancerType.toLowerCase()) ||
+            spec.toLowerCase().includes('oncology') ||
+            spec.toLowerCase().includes('cancer')
+          )
+        );
+        if (filtered.length > 0) {
+          return filtered;
+        }
+      }
+      return cancerHospitals;
+    }
+    
+    // Fallback to original data if no cancer hospitals found
     const hospitalsByState: Record<string, HospitalData[]> = {
       'Andhra Pradesh': [
         {
@@ -494,6 +516,41 @@ export class HospitalDataService {
     };
 
     // Return hospitals for the specified state, or empty array if state not found
-    return hospitalsByState[state] || [];
+    const fallbackHospitals = hospitalsByState[state] || [];
+    
+    // If we have fallback hospitals, ensure they include cancer specializations
+    return fallbackHospitals.map(hospital => ({
+      ...hospital,
+      specializations: [...hospital.specializations, cancerType].filter((spec, index, arr) => 
+        arr.indexOf(spec) === index
+      )
+    }));
+  }
+  
+  // New method to get all cancer hospitals
+  static getAllCancerHospitals(): HospitalData[] {
+    return getAllCancerHospitals();
+  }
+  
+  // New method to search cancer hospitals
+  static searchCancerHospitals(query: string): HospitalData[] {
+    return searchCancerHospitals(query);
+  }
+  
+  // New method to get hospitals by multiple states (for nearby state search)
+  static getHospitalsByMultipleStates(states: string[], cancerType: string): HospitalData[] {
+    const allHospitals: HospitalData[] = [];
+    
+    for (const state of states) {
+      const stateHospitals = this.getHospitalsByState(state, cancerType);
+      allHospitals.push(...stateHospitals);
+    }
+    
+    // Remove duplicates based on hospital ID
+    const uniqueHospitals = allHospitals.filter((hospital, index, arr) => 
+      arr.findIndex(h => h.id === hospital.id) === index
+    );
+    
+    return uniqueHospitals;
   }
 }

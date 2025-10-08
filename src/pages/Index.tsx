@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PatientForm } from '@/components/PatientForm';
 import { PredictionResults } from '@/components/PredictionResults';
 import { HospitalFinder } from '@/components/HospitalFinder';
@@ -12,12 +12,20 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Heart, Stethoscope, Building, Calendar, BarChart3, Activity } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { testHospitalSearch } from '@/utils/hospitalSearchTest';
 
 const Index: React.FC = () => {
   const [predictionResult, setPredictionResult] = useState<PredictionResult | null>(null);
   const [currentView, setCurrentView] = useState<'form' | 'results' | 'hospitals'>('form');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  // Make hospital test function available globally for testing
+  useEffect(() => {
+    // @ts-ignore
+    window.testHospitalSearch = testHospitalSearch;
+    console.log('🏥 Hospital search test function available! Run "testHospitalSearch()" in console to test.');
+  }, []);
 
   const handlePrediction = async (patientData: PatientData) => {
     setLoading(true);
