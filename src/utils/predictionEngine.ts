@@ -10,9 +10,51 @@ import { determineCancerStage } from './cancerStaging';
 import { CancerAssessment } from './cancerAssessment';
 import { HealthMetrics } from './healthMetrics';
 import { PrognosisGenerator } from './prognosisGenerator';
+import { SHAPExplanationEngine } from './shapExplanationEngine';
 
-// Enhanced AI Cancer Prediction Engine with Improved Medical Accuracy
+// AI-ML API Configuration
+const AI_ML_API_BASE = 'http://localhost:5000/api';
+
+// Enhanced AI Cancer Prediction Engine with AI-ML Integration
 export class CancerPredictionEngine {
+  
+  // NEW: AI-ML API Integration
+  static async predictWithAIML(patientData: PatientData): Promise<CancerPrediction> {
+    try {
+      const response = await fetch(`${AI_ML_API_BASE}/predict`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ patientData })
+      });
+      
+      if (!response.ok) {
+        throw new Error('AI-ML API request failed');
+      }
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Convert AI-ML response to CancerPrediction format
+        const stage = this.determineMedicalStage(patientData, result.prediction.cancerType);
+        
+        return {
+          cancerType: result.prediction.cancerType,
+          confidence: result.prediction.confidence,
+          riskLevel: result.prediction.riskLevel,
+          stage: result.prediction.cancerType === 'No Cancer' ? '' : stage,
+          detectedAt: new Date().toISOString()
+        };
+      } else {
+        throw new Error(result.error || 'AI-ML prediction failed');
+      }
+    } catch (error) {
+      console.warn('AI-ML API unavailable, falling back to local prediction:', error);
+      // Fallback to existing prediction logic
+      return this.predictCancerType(patientData);
+    }
+  }
   
   // Advanced ML-based prediction with medical accuracy improvements
   static predictCancerType(patientData: PatientData): CancerPrediction {
@@ -251,15 +293,20 @@ export class CancerPredictionEngine {
     return stage || 'I'; // Default to Stage I if determineCancerStage returns empty
   }
 
-  // Generate complete prediction result
-  static predict(patientData: PatientData): PredictionResult {
-    const prediction = this.predictCancerType(patientData);
+  // Generate complete prediction result with AI-ML integration
+  static async predict(patientData: PatientData): Promise<PredictionResult> {
+    // Try AI-ML prediction first, fallback to local if unavailable
+    const prediction = await this.predictWithAIML(patientData);
+    
     const medications = medicationDatabase[prediction.cancerType] || [];
     const nutritionRecommendations = nutritionDatabase[prediction.cancerType] || [];
     const featureImportance = generateFeatureImportance(patientData);
     const recommendations = generateRecommendations(prediction, patientData);
     const appointmentRecommendation = PrognosisGenerator.generateAppointmentRecommendation(prediction.stage, prediction.cancerType);
     const prognosis = PrognosisGenerator.generatePrognosis(prediction.stage, prediction.cancerType, patientData);
+    
+    // Generate SHAP explanation
+    const shapExplanation = SHAPExplanationEngine.generateSHAPExplanation(patientData, prediction);
     
     return {
       prediction,
@@ -268,7 +315,8 @@ export class CancerPredictionEngine {
       recommendations,
       nutritionRecommendations,
       appointmentRecommendation,
-      prognosis
+      prognosis,
+      shapExplanation
     };
   }
 }

@@ -7,10 +7,12 @@ import { DatasetViewer } from '@/components/DatasetViewer';
 import { UserMenu } from '@/components/UserMenu';
 import { PatientData, PredictionResult } from '@/types/healthcare';
 import { EnhancedCancerPredictionEngine } from '@/utils/enhancedPredictionEngine';
+import { CancerPredictionEngine } from '@/utils/predictionEngine';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Heart, Stethoscope, Building, Calendar, BarChart3, Activity } from 'lucide-react';
+import { AIMLStatus } from '@/components/AIMLStatus';
 import { useToast } from '@/hooks/use-toast';
 import { testHospitalSearch } from '@/utils/hospitalSearchTest';
 
@@ -31,27 +33,41 @@ const Index: React.FC = () => {
     setLoading(true);
     
     try {
-      // Simulate API call delay for better UX
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('Analyzing patient data with AI-ML system:', patientData);
       
-      console.log('Analyzing patient data:', patientData);
-      const result = EnhancedCancerPredictionEngine.predict(patientData);
+      // Use the new AI-ML integrated prediction engine
+      const result = await CancerPredictionEngine.predict(patientData);
       
-      console.log('Prediction result:', result);
+      console.log('AI-ML Prediction result:', result);
       setPredictionResult(result);
       setCurrentView('results');
       
       toast({
-        title: "Analysis Complete",
-        description: `AI analysis completed with ${result.prediction.confidence}% confidence`,
+        title: "AI-ML Analysis Complete",
+        description: `Advanced AI analysis completed with ${result.prediction.confidence}% confidence`,
       });
     } catch (error) {
-      console.error('Prediction error:', error);
-      toast({
-        title: "Analysis Failed",
-        description: "There was an error processing your health data. Please try again.",
-        variant: "destructive",
-      });
+      console.error('AI-ML Prediction error:', error);
+      
+      // Fallback to enhanced prediction engine if AI-ML fails
+      try {
+        console.log('Falling back to enhanced prediction engine...');
+        const fallbackResult = EnhancedCancerPredictionEngine.predict(patientData);
+        setPredictionResult(fallbackResult);
+        setCurrentView('results');
+        
+        toast({
+          title: "Analysis Complete (Fallback)",
+          description: `Analysis completed with ${fallbackResult.prediction.confidence}% confidence using fallback system`,
+        });
+      } catch (fallbackError) {
+        console.error('Fallback prediction error:', fallbackError);
+        toast({
+          title: "Analysis Failed",
+          description: "There was an error processing your health data. Please ensure the AI-ML API server is running.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -81,8 +97,8 @@ const Index: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="bg-gradient-to-r from-red-500 to-pink-500 p-2 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-200">
-                <Heart className="h-8 w-8 text-white animate-pulse" />
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-200">
+                <Stethoscope className="h-8 w-8 text-white" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -91,7 +107,10 @@ const Index: React.FC = () => {
                 <p className="text-sm text-gray-600">Advanced Healthcare Analytics</p>
               </div>
             </div>
-            <UserMenu />
+              <div className="flex items-center space-x-4">
+                <AIMLStatus />
+                <UserMenu />
+              </div>
           </div>
         </div>
       </header>
@@ -103,7 +122,7 @@ const Index: React.FC = () => {
             {/* Hero Section */}
             <div className="text-center space-y-4 mb-12">
               <div className="flex justify-center mb-6">
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 rounded-full shadow-2xl animate-bounce">
+                <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-4 rounded-full shadow-2xl animate-pulse">
                   <Activity className="h-12 w-12 text-white" />
                 </div>
               </div>
@@ -111,8 +130,12 @@ const Index: React.FC = () => {
                 Comprehensive Health Assessment
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Our advanced AI system analyzes your health data using machine learning algorithms 
-                trained on extensive medical datasets to provide accurate risk assessments and personalized recommendations.
+                Our advanced AI-ML system combines machine learning models with expert medical knowledge 
+                to provide accurate cancer risk assessments and personalized recommendations.
+                <br />
+                <span className="text-sm text-blue-600 font-medium mt-2 block">
+                  🤖 AI-ML API Integration Active - Enhanced Predictions Available
+                </span>
               </p>
             </div>
 
@@ -210,7 +233,7 @@ const Index: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <div className="flex justify-center items-center space-x-2 mb-4">
-              <Heart className="h-6 w-6 text-red-500" />
+              <Stethoscope className="h-6 w-6 text-blue-600" />
               <span className="text-lg font-semibold text-gray-900">AI Cancer Prediction System</span>
             </div>
             <p className="text-gray-600 text-sm max-w-2xl mx-auto">
