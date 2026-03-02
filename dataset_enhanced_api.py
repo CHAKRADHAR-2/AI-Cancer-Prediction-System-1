@@ -110,20 +110,105 @@ class EnhancedPredictionEngine:
     
     @staticmethod
     def _determine_cancer_type(patient_data: Dict[str, Any], risk_score: float) -> str:
-        """Determine cancer type based on patient data"""
-        if risk_score > 0.7:
-            if patient_data.get('persistentCough', False):
-                return 'Lung Cancer'
-            elif patient_data.get('gender') == 'female' and patient_data.get('age', 0) > 40:
+        """Comprehensive cancer type determination based on symptoms and patient data"""
+        age = patient_data.get('age', 50)
+        gender = patient_data.get('gender', 'unknown')
+        smoking = patient_data.get('smokingHistory', 'never')
+        
+        # Symptom-based cancer detection (highest priority)
+        if patient_data.get('persistentCough', False) and smoking in ['current', 'former']:
+            return 'Lung Cancer'
+        
+        if patient_data.get('skinChanges', False):
+            return 'Skin Cancer (Melanoma)'
+        
+        # Digestive issues - more specific detection
+        if patient_data.get('digestiveIssues', False):
+            if gender == 'male' and age > 50 and not patient_data.get('unexplainedWeightLoss', False):
+                return 'Prostate Cancer'  # Prostate issues often cause digestive symptoms
+            elif patient_data.get('unexplainedWeightLoss', False) and patient_data.get('persistentFatigue', False):
+                if age > 55:
+                    return 'Pancreatic Cancer'
+                else:
+                    return 'Liver Cancer'
+            else:
+                return 'Colon Cancer'
+        
+        # Bleeding-based detection
+        if patient_data.get('unusualBleeding', False):
+            if gender == 'female':
+                if age < 50:
+                    return 'Cervical Cancer'
+                elif age >= 50:
+                    return 'Ovarian Cancer'
+            else:
+                return 'Blood Cancer (Leukemia)'
+        
+        # Tumor size and staging based detection
+        tumor_size = patient_data.get('tumorSize', 0)
+        lymph_nodes = patient_data.get('lymphNodes', 0)
+        metastasis = patient_data.get('metastasis', False)
+        
+        if tumor_size > 0 or lymph_nodes > 0 or metastasis:
+            if gender == 'female':
+                if age > 40:
+                    return 'Breast Cancer'
+                elif age < 50:
+                    return 'Cervical Cancer'
+                else:
+                    return 'Ovarian Cancer'
+            elif gender == 'male':
+                if age > 50:
+                    return 'Prostate Cancer'
+                elif smoking in ['current', 'former']:
+                    return 'Lung Cancer'
+                else:
+                    return 'Liver Cancer'
+        
+        # Age and gender-based risk assessment
+        if risk_score > 0.4:
+            if gender == 'female':
+                if age >= 50:
+                    return 'Breast Cancer'
+                elif age >= 30 and age < 50:
+                    return 'Cervical Cancer'
+                elif age < 30:
+                    return 'Ovarian Cancer'
+            elif gender == 'male':
+                if age >= 60:
+                    return 'Prostate Cancer'
+                elif age >= 40 and age < 60:
+                    if smoking in ['current', 'former']:
+                        return 'Lung Cancer'
+                    else:
+                        return 'Liver Cancer'
+                elif age < 40:
+                    return 'Blood Cancer (Leukemia)'
+        
+        # Smoking-based detection
+        if smoking == 'current':
+            return 'Lung Cancer'
+        
+        # Family history considerations
+        if patient_data.get('familyHistory', False):
+            if gender == 'female':
                 return 'Breast Cancer'
-            elif patient_data.get('gender') == 'male' and patient_data.get('age', 0) > 50:
+            else:
+                return 'Prostate Cancer'
+        
+        # Default based on most common cancers by demographics
+        if gender == 'female':
+            if age > 50:
+                return 'Breast Cancer'
+            else:
+                return 'Cervical Cancer'
+        elif gender == 'male':
+            if age > 60:
                 return 'Prostate Cancer'
             else:
-                return 'General Cancer Risk'
-        elif risk_score > 0.4:
-            return 'Moderate Risk'
-        else:
-            return 'No Cancer'
+                return 'Lung Cancer'
+        
+        return 'No Cancer'
 
 class DatasetRecommendationEngine:
     """Generate recommendations based on dataset-trained predictions"""

@@ -33,30 +33,40 @@ app = Flask(__name__)
 CORS(app)
 
 # Initialize ML system
-logger.info("Initializing ML Cancer Prediction System...")
+logger.info("Initializing STRICT ML-FIRST Cancer Prediction System...")
 ml_model = None
+ml_model_status = "not_loaded"
 
 try:
     from cancer_prediction_model import CancerPredictionModel
     ml_model = CancerPredictionModel()
-    logger.info("SUCCESS: ML Model loaded")
+    ml_model_status = "loaded"
+    logger.info("SUCCESS: ML Model loaded - STRICT ML-FIRST mode enabled")
 except ImportError as e:
-    logger.warning(f"ML Model not available: {e}")
+    ml_model_status = "import_error"
+    logger.warning(f"ML Model import failed: {e} - Will use rule-based fallback")
 except Exception as e:
-    logger.error(f"ERROR loading ML model: {e}")
+    ml_model_status = "load_error"
+    logger.error(f"ML Model loading failed: {e} - Will use rule-based fallback")
 
 class PredictionEngine:
     """Optimized prediction engine with proper error handling"""
     
     @staticmethod
     def basic_prediction(patient_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Basic prediction logic with improved confidence calculation"""
+        """Enhanced prediction logic for all cancer types"""
         risk_score = 0.0
         
-        # Age factor
+        # Age factor (progressive risk)
         age = patient_data.get('age', 50)
-        if age > 60:
+        if age > 70:
+            risk_score += 0.4
+        elif age > 60:
             risk_score += 0.3
+        elif age > 50:
+            risk_score += 0.2
+        elif age > 40:
+            risk_score += 0.1
         
         # Smoking factor
         smoking_history = patient_data.get('smokingHistory', 'never')
@@ -67,44 +77,113 @@ class PredictionEngine:
         
         # Family history
         if patient_data.get('familyHistory', False):
-            risk_score += 0.2
+            risk_score += 0.25
         
-        # Symptoms
-        if patient_data.get('persistentCough', False):
-            risk_score += 0.3
-        if patient_data.get('unexplainedWeightLoss', False):
+        # Symptom-based risk factors
+        symptoms = [
+            'persistentCough', 'unexplainedWeightLoss', 'persistentFatigue',
+            'breastLump', 'skinChanges', 'bloodInStool', 'urinaryProblems',
+            'abnormalBleeding', 'jaundice', 'abdominalPain', 'newMoles',
+            'bowelChanges', 'bloodInUrine', 'pelvicPain'
+        ]
+        
+        symptom_count = sum(1 for symptom in symptoms if patient_data.get(symptom, False))
+        risk_score += symptom_count * 0.15
+        
+        # Lifestyle factors
+        if patient_data.get('alcoholConsumption') == 'frequent':
             risk_score += 0.2
+        elif patient_data.get('alcoholConsumption') == 'occasional':
+            risk_score += 0.1
+        
+        # BMI factor
+        bmi = patient_data.get('bmi', 25)
+        if bmi > 30:
+            risk_score += 0.15
+        elif bmi > 35:
+            risk_score += 0.25
         
         # Determine cancer type
         cancer_type = PredictionEngine._determine_cancer_type(patient_data, risk_score)
         
-        # Calculate confidence
+        # Calculate confidence based on risk score and symptoms
         if cancer_type == 'No Cancer':
-            confidence = min((1 - risk_score) * 100, 95.0)
+            confidence = max(15.0, min((1 - risk_score) * 100, 95.0))
         else:
-            confidence = min(risk_score * 100, 95.0)
-        
-        confidence = max(confidence, 15.0)  # Minimum confidence
+            confidence = max(25.0, min(risk_score * 100 + symptom_count * 10, 95.0))
         
         return {
             'predicted_cancer': cancer_type,
-            'confidence': confidence
+            'confidence': confidence,
+            'stage': PredictionEngine._determine_stage(cancer_type, confidence)
         }
     
     @staticmethod
     def _determine_cancer_type(patient_data: Dict[str, Any], risk_score: float) -> str:
-        """Determine cancer type based on patient data and risk score"""
-        if risk_score > 0.7:
-            if patient_data.get('persistentCough', False):
-                return 'Lung Cancer'
-            elif patient_data.get('gender') == 'female':
-                return 'Breast Cancer'
-            else:
-                return 'General Cancer Risk'
-        elif risk_score > 0.4:
-            return 'Moderate Risk'
-        else:
+        """Determine cancer type based on patient data and risk factors"""
+        if risk_score < 0.3:
             return 'No Cancer'
+        
+        # High risk cases (>0.7)
+        if risk_score > 0.7:
+            # Lung cancer indicators
+            if patient_data.get('persistentCough', False) and patient_data.get('smokingHistory') in ['current', 'former']:
+                return 'Lung Cancer'
+            
+            # Breast cancer indicators (females)
+            if patient_data.get('gender') == 'female' and patient_data.get('age', 0) > 40:
+                if patient_data.get('breastLump', False) or patient_data.get('familyHistory', False):
+                    return 'Breast Cancer'
+            
+            # Prostate cancer indicators (males)
+            if patient_data.get('gender') == 'male' and patient_data.get('age', 0) > 50:
+                if patient_data.get('urinaryProblems', False) or patient_data.get('bloodInUrine', False):
+                    return 'Prostate Cancer'
+            
+            # Colon cancer indicators
+            if patient_data.get('bloodInStool', False) or patient_data.get('bowelChanges', False):
+                return 'Colon Cancer'
+            
+            # Liver cancer indicators
+            if patient_data.get('jaundice', False) or patient_data.get('alcoholConsumption') == 'frequent':
+                return 'Liver Cancer'
+            
+            # Skin cancer indicators
+            if patient_data.get('skinChanges', False) or patient_data.get('newMoles', False):
+                return 'Skin Cancer'
+            
+            # Cervical cancer indicators (females)
+            if patient_data.get('gender') == 'female' and patient_data.get('abnormalBleeding', False):
+                return 'Cervical Cancer'
+            
+            # Pancreatic cancer indicators
+            if patient_data.get('diabetes', False) and patient_data.get('abdominalPain', False):
+                return 'Pancreatic Cancer'
+            
+            # Default high risk
+            return 'High Cancer Risk'
+        
+        # Moderate risk cases (0.4-0.7)
+        elif risk_score > 0.4:
+            return 'Moderate Cancer Risk'
+        
+        # Low risk cases (0.3-0.4)
+        else:
+            return 'Low Cancer Risk'
+    
+    @staticmethod
+    def _determine_stage(cancer_type: str, confidence: float) -> str:
+        """Determine cancer stage for rule-based fallback ONLY"""
+        if 'No Cancer' in cancer_type or 'Risk' in cancer_type:
+            return ''
+        
+        # Rule-based staging for fallback cases only
+        if confidence >= 80:
+            return 'III'
+        elif confidence >= 60:
+            return 'II'
+        else:
+            return 'I'
 
 class RecommendationEngine:
     """Generate medical recommendations based on predictions"""
@@ -221,18 +300,27 @@ class SHAPExplainer:
 # API Routes
 @app.route('/api/health', methods=['GET'])
 def health_check() -> Dict[str, Any]:
-    """Health check endpoint with comprehensive status"""
+    """Health check endpoint with ML-first status"""
     return jsonify({
         'status': 'healthy',
-        'message': 'Optimized ML Cancer Prediction API is running',
-        'ml_model': 'available' if ml_model else 'not available',
-        'version': '2.0.0',
+        'message': 'STRICT ML-FIRST Cancer Prediction API is running',
+        'ml_model': {
+            'available': ml_model is not None,
+            'status': ml_model_status,
+            'mode': 'STRICT_ML_FIRST'
+        },
+        'prediction_strategy': {
+            'primary': 'ML_MODEL',
+            'fallback': 'RULE_BASED',
+            'description': 'ML model prediction attempted first, rule-based only on ML failure'
+        },
+        'version': '2.1.0-ML-FIRST',
         'timestamp': datetime.now(timezone.utc).isoformat()
     })
 
 @app.route('/api/predict', methods=['POST'])
 def predict_cancer():
-    """Main cancer prediction endpoint with comprehensive error handling"""
+    """Main cancer prediction endpoint with STRICT ML-FIRST INFERENCE"""
     try:
         data = request.get_json()
         
@@ -250,18 +338,37 @@ def predict_cancer():
         if missing_fields:
             return jsonify({'error': f'Missing required fields: {missing_fields}'}), 400
         
-        # Use ML model if available, otherwise basic logic
+        # STRICT ML-FIRST INFERENCE PATH
+        result = None
+        prediction_method = "unknown"
+        
+        # Step 1: Try ML model prediction (PRIMARY)
         if ml_model:
             try:
+                logger.info("ATTEMPTING ML MODEL PREDICTION (PRIMARY PATH)")
                 result = ml_model.predict(patient_data)
+                prediction_method = "ML_MODEL"
+                logger.info(f"SUCCESS: ML prediction completed - {result['predicted_cancer']} ({result['confidence']:.2f}%)")
             except Exception as ml_error:
-                logger.warning(f"ML model prediction failed: {ml_error}")
-                # Train model if needed
-                logger.info("Attempting to train ML model...")
-                ml_model.train_models()
-                result = ml_model.predict(patient_data)
-        else:
+                logger.error(f"ML MODEL PREDICTION FAILED: {ml_error}")
+                
+                # Step 2: Try training and retry ML model
+                try:
+                    logger.info("ATTEMPTING ML MODEL TRAINING AND RETRY...")
+                    ml_model.train_models()
+                    result = ml_model.predict(patient_data)
+                    prediction_method = "ML_MODEL_RETRAINED"
+                    logger.info(f"SUCCESS: ML prediction after retraining - {result['predicted_cancer']} ({result['confidence']:.2f}%)")
+                except Exception as retrain_error:
+                    logger.error(f"ML MODEL RETRAIN FAILED: {retrain_error}")
+                    result = None
+        
+        # Step 3: Fallback to rule-based ONLY if ML completely fails
+        if result is None:
+            logger.warning("FALLING BACK TO RULE-BASED PREDICTION (FALLBACK PATH)")
             result = PredictionEngine.basic_prediction(patient_data)
+            prediction_method = "RULE_BASED_FALLBACK"
+            logger.info(f"FALLBACK: Rule-based prediction - {result['predicted_cancer']} ({result['confidence']:.2f}%)")
         
         # Generate recommendations and explanations
         recommendations = RecommendationEngine.generate_recommendations(
@@ -276,12 +383,23 @@ def predict_cancer():
             'prediction': {
                 'cancerType': result['predicted_cancer'],
                 'confidence': round(result['confidence'], 2),
-                'riskLevel': _get_risk_level(result['confidence'])
+                'riskLevel': _get_risk_level(result['confidence']),
+                'stage': result.get('stage', ''),  # DIRECT FROM ML MODEL - NO RECOMPUTATION
+                'predictionMethod': prediction_method  # Show which method was used
             },
             'recommendations': recommendations,
             'shapExplanation': explanations,
+            'metadata': {
+                'mlModelAvailable': ml_model is not None,
+                'predictionSource': prediction_method,
+                'isMLPrediction': prediction_method.startswith('ML_'),
+                'isFallback': prediction_method == 'RULE_BASED_FALLBACK',
+                'usesRealData': prediction_method.startswith('ML_'),
+                'dataSource': 'real_cancer_datasets' if prediction_method.startswith('ML_') else 'rule_based',
+                'modelType': 'ensemble_ml' if prediction_method.startswith('ML_') else 'rule_based'
+            },
             'timestamp': datetime.now(timezone.utc).isoformat(),
-            'version': '2.0.0'
+            'version': '2.1.0-ML-FIRST'
         }
         
         return jsonify(response)
@@ -324,6 +442,7 @@ def test_prediction():
         return response.get_json()
 
 # Utility functions
+# Utility functions
 def _get_risk_level(confidence: float) -> str:
     """Convert confidence to risk level"""
     if confidence >= 70:
@@ -346,7 +465,9 @@ def internal_error(error):
     return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
-    logger.info("Starting Optimized ML Cancer Prediction API...")
+    logger.info("Starting STRICT ML-FIRST Cancer Prediction API...")
+    logger.info(f"ML Model Status: {ml_model_status}")
+    logger.info("Prediction Strategy: ML-FIRST with rule-based fallback")
     logger.info("API available at: http://localhost:5000")
     logger.info("Health check: http://localhost:5000/api/health")
     logger.info("Test endpoint: http://localhost:5000/api/test")
