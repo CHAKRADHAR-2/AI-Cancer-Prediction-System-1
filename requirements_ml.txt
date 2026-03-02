@@ -1,0 +1,6 @@
+# ML Training Requirements (Python 3.13 Compatible)
+pandas>=2.1.0
+numpy>=1.25.0
+scikit-learn>=1.3.0
+joblib>=1.3.0
+setuptools>=68.0.0
