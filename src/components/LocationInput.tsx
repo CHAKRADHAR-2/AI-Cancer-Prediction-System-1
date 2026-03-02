@@ -22,13 +22,13 @@ export function LocationInput({ onLocationSet, isLoading }: LocationInputProps) 
   const [gettingLocation, setGettingLocation] = useState(false);
   const { toast } = useToast();
 
-  const handleStateChange = (newState: string) => {
+  const handleStateChange = (newState: string): void => {
     setState(newState);
     setDistrict('');
     setCity('');
   };
 
-  const handleDistrictChange = (newDistrict: string) => {
+  const handleDistrictChange = (newDistrict: string): void => {
     setDistrict(newDistrict);
     setCity('');
   };

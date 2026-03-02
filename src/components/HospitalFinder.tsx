@@ -16,12 +16,12 @@ export function HospitalFinder({ onBack, initialCancerType }: HospitalFinderProp
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
-  const handleLocationSet = (location: UserLocation) => {
+  const handleLocationSet = (location: UserLocation): void => {
     console.log('Location set in HospitalFinder:', location);
     setUserLocation(location);
   };
 
-  const handleNewSearch = () => {
+  const handleNewSearch = (): void => {
     setUserLocation(null);
   };
 

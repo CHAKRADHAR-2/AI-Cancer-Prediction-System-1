@@ -14,7 +14,7 @@ interface PrognosisSummaryProps {
 }
 
 export function PrognosisSummary({ prognosis, cancerStage, cancerType }: PrognosisSummaryProps) {
-  const getOutlookColor = (outlook: string) => {
+  const getOutlookColor = (outlook: string): void => {
     switch (outlook) {
       case 'Excellent': return 'text-green-600 bg-green-50 border-green-200';
       case 'Good': return 'text-blue-600 bg-blue-50 border-blue-200';
@@ -24,7 +24,7 @@ export function PrognosisSummary({ prognosis, cancerStage, cancerType }: Prognos
     }
   };
 
-  const getOutlookIcon = (outlook: string) => {
+  const getOutlookIcon = (outlook: string): void => {
     switch (outlook) {
       case 'Excellent': return <Shield className="h-5 w-5 text-green-600" />;
       case 'Good': return <TrendingUp className="h-5 w-5 text-blue-600" />;
@@ -39,7 +39,7 @@ export function PrognosisSummary({ prognosis, cancerStage, cancerType }: Prognos
     return match ? parseInt(match[1]) : 50;
   };
 
-  const getProgressColor = (percentage: number) => {
+  const getProgressColor = (percentage: number): void => {
     if (percentage >= 80) return 'bg-green-500';
     if (percentage >= 60) return 'bg-blue-500';
     if (percentage >= 40) return 'bg-orange-500';

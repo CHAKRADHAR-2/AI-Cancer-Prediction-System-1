@@ -71,7 +71,7 @@ export function HospitalRecommendations({
     }
   };
 
-  const toggleHospitalDetails = (hospitalId: string) => {
+  const toggleHospitalDetails = (hospitalId: string): void => {
     if (selectedHospital === hospitalId) {
       setSelectedHospital(null);
     } else {

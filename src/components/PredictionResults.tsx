@@ -24,11 +24,14 @@ interface PredictionResultsProps {
 export function PredictionResults({ result }: PredictionResultsProps) {
   const { prediction, medications, featureImportance, recommendations, nutritionRecommendations, appointmentRecommendation, prognosis } = result;
 
-  // CRITICAL FIX: Check if cancer was detected - stage must NOT be empty AND cancer type must NOT be "No Cancer Detected"
-  const cancerDetected = prediction.stage !== '' && prediction.cancerType !== 'No Cancer Detected';
+  // CRITICAL FIX: Check if cancer was detected - cancer type must NOT be "No Cancer Detected"
+  const cancerDetected = prediction.cancerType !== 'No Cancer Detected' && 
+                        !prediction.cancerType.includes('No Cancer') &&
+                        !prediction.cancerType.includes('Risk') &&
+                        prediction.cancerType !== '';
 
   // Get mood-based animations and styling
-  const getMoodStyling = () => {
+  const getMoodStyling = (): void => {
     if (!cancerDetected) {
       return {
         containerClass: "animate-pulse bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50",

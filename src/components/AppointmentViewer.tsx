@@ -15,7 +15,7 @@ export function AppointmentViewer() {
   const [cancelling, setCancelling] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const searchAppointments = () => {
+  const searchAppointments = (): void => {
     if (!phoneNumber.trim()) {
       toast({
         title: "Phone Number Required",
@@ -70,7 +70,7 @@ export function AppointmentViewer() {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string): void => {
     switch (status) {
       case 'scheduled': return 'bg-blue-100 text-blue-800';
       case 'confirmed': return 'bg-green-100 text-green-800';
@@ -79,7 +79,7 @@ export function AppointmentViewer() {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string): void => {
     return new Date(dateString).toLocaleDateString('en-IN', {
       year: 'numeric',
       month: 'long',

@@ -4,32 +4,41 @@ import { PatientData } from '@/types/healthcare';
 export function determineCancerStage(patientData: PatientData): 'I' | 'II' | 'III' | 'IV' {
   const { tumorSize, lymphNodes, metastasis } = patientData;
   
-  // If metastasis is present, it's always Stage IV
-  if (metastasis) {
+  // Stage IV - ONLY metastasis confirms this
+  if (metastasis === true) {
     return 'IV';
   }
   
-  // If lymph nodes are significantly affected (>4), likely Stage III
+  // Stage III - Significant lymph node involvement (>4 nodes)
   if (lymphNodes && lymphNodes > 4) {
     return 'III';
   }
   
-  // If tumor is large (>5cm) or moderate lymph node involvement, Stage II-III
-  if (tumorSize && tumorSize > 5) {
-    return lymphNodes && lymphNodes > 0 ? 'III' : 'II';
+  // Stage III - Large tumor (>5cm) WITH lymph node involvement
+  if (tumorSize && tumorSize > 5 && lymphNodes && lymphNodes > 0) {
+    return 'III';
   }
   
-  // If tumor is moderate (2-5cm), Stage I-II
-  if (tumorSize && tumorSize > 2) {
-    return lymphNodes && lymphNodes > 2 ? 'II' : 'I';
+  // Stage II - Moderate tumor (2-5cm) OR limited lymph nodes (1-4)
+  if (tumorSize && tumorSize >= 2) {
+    // Large tumor (>5cm) without nodes = Stage II
+    if (tumorSize > 5 && (!lymphNodes || lymphNodes === 0)) {
+      return 'II';
+    }
+    // Medium tumor (2-5cm) with any nodes = Stage II
+    if (tumorSize <= 5 && lymphNodes && lymphNodes > 0) {
+      return 'II';
+    }
+    // Medium tumor (2-5cm) without nodes = Stage I
+    return 'I';
   }
   
-  // Small tumor (<2cm) with minimal lymph node involvement
-  if (lymphNodes && lymphNodes > 0) {
+  // Stage II - Lymph nodes involved (1-4) without large tumor
+  if (lymphNodes && lymphNodes > 0 && lymphNodes <= 4) {
     return 'II';
   }
   
-  // Default to Stage I for early/small tumors
+  // Stage I - Default for detected cancer without definitive staging indicators
   return 'I';
 }
 
@@ -46,6 +55,6 @@ export function getStageDescription(stage: 'I' | 'II' | 'III' | 'IV' | ''): stri
     case '':
       return 'No cancer stage applicable - No cancer detected';
     default:
-      return 'Stage information not available';
+      return 'Stage I - Early stage cancer detected';
   }
 }

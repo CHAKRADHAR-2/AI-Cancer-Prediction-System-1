@@ -73,16 +73,16 @@ const Index: React.FC = () => {
     }
   };
 
-  const handleNewAnalysis = () => {
+  const handleNewAnalysis = (): void => {
     setPredictionResult(null);
     setCurrentView('form');
   };
 
-  const handleFindHospitals = () => {
+  const handleFindHospitals = (): void => {
     setCurrentView('hospitals');
   };
 
-  const handleBackToResults = () => {
+  const handleBackToResults = (): void => {
     setCurrentView('results');
   };
 

@@ -47,7 +47,7 @@ export function AppointmentScheduler({ recommendation, cancerStage, cancerType =
     '02:00 PM', '02:30 PM', '03:00 PM', '03:30 PM', '04:00 PM', '04:30 PM'
   ];
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string): void => {
     setAppointmentData(prev => ({
       ...prev,
       [field]: value
@@ -97,7 +97,7 @@ export function AppointmentScheduler({ recommendation, cancerStage, cancerType =
     }
   };
 
-  const getUrgencyColor = (urgency: string) => {
+  const getUrgencyColor = (urgency: string): void => {
     switch (urgency) {
       case 'High': return 'text-red-600 bg-red-50 border-red-200';
       case 'Medium': return 'text-orange-600 bg-orange-50 border-orange-200';
@@ -106,12 +106,12 @@ export function AppointmentScheduler({ recommendation, cancerStage, cancerType =
     }
   };
 
-  const getMinDate = () => {
+  const getMinDate = (): void => {
     const today = new Date();
     return today.toISOString().split('T')[0];
   };
 
-  const getMaxDate = () => {
+  const getMaxDate = (): void => {
     const maxDate = new Date();
     maxDate.setMonth(maxDate.getMonth() + 6);
     return maxDate.toISOString().split('T')[0];

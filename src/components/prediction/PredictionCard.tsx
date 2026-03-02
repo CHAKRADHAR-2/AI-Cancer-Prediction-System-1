@@ -13,7 +13,7 @@ interface PredictionCardProps {
 }
 
 export function PredictionCard({ prediction, cancerDetected }: PredictionCardProps) {
-  const getRiskColor = (riskLevel: string) => {
+  const getRiskColor = (riskLevel: string): void => {
     switch (riskLevel) {
       case 'High': return 'destructive';
       case 'Medium': return 'default';
@@ -22,7 +22,7 @@ export function PredictionCard({ prediction, cancerDetected }: PredictionCardPro
     }
   };
 
-  const getRiskIcon = (riskLevel: string) => {
+  const getRiskIcon = (riskLevel: string): void => {
     switch (riskLevel) {
       case 'High': return <AlertTriangle className="h-4 w-4" />;
       case 'Medium': return <Info className="h-4 w-4" />;
@@ -52,14 +52,14 @@ export function PredictionCard({ prediction, cancerDetected }: PredictionCardPro
           </div>
           
           {/* Only show staging section if cancer is detected */}
-          {cancerDetected && prediction.stage && (
+          {cancerDetected && (
             <div className="text-center">
               <h3 className="text-lg font-semibold mb-2">Cancer Stage</h3>
               <div className="space-y-2">
                 <p className="text-2xl font-bold text-orange-600">
-                  Stage {prediction.stage}
+                  Stage {prediction.stage || 'I'}
                 </p>
-                <p className="text-sm text-muted-foreground">{getStageDescription(prediction.stage)}</p>
+                <p className="text-sm text-muted-foreground">{getStageDescription(prediction.stage || 'I')}</p>
               </div>
             </div>
           )}

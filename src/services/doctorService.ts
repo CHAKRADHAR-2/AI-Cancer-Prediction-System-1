@@ -341,7 +341,7 @@ export class DoctorService {
         const doctorId = `${hospitalId}_doc_${index + 1}`;
         
         // Generate different qualifications based on specialization
-        const getQualification = (specialization: string) => {
+        const getQualification = (specialization: string): void => {
           const qualifications = {
             'Pulmonary Oncology': 'MD Medicine, DM Pulmonary Medicine, Fellowship Thoracic Oncology',
             'Thoracic Surgery': 'MS Surgery, MCh Thoracic Surgery, FACS',

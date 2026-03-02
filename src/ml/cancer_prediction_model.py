@@ -203,6 +203,7 @@ class CancerPredictionModel:
         return {
             'predicted_cancer': top_prediction,
             'confidence': confidence,
+            'stage': self._determine_ml_stage(top_prediction, confidence),
             'all_predictions': predictions,
             'model_type': 'ensemble_ml'
         }
@@ -237,6 +238,21 @@ class CancerPredictionModel:
         }
         
         return [feature_mapping[feature] for feature in self.feature_names]
+    
+    def _determine_ml_stage(self, cancer_type: str, confidence: float) -> str:
+        """ML-based stage determination"""
+        if 'No Cancer' in cancer_type:
+            return ''
+        
+        # ML model stage determination based on confidence and cancer type
+        if confidence >= 90:
+            return 'IV'  # Very high confidence
+        elif confidence >= 75:
+            return 'III' # High confidence
+        elif confidence >= 60:
+            return 'II'  # Moderate confidence
+        else:
+            return 'I'   # Lower confidence, early stage
     
     def save_models(self):
         """Save trained models and encoders"""

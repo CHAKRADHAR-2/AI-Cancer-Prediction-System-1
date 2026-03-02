@@ -60,6 +60,12 @@ export interface CancerPrediction {
   riskLevel: 'Low' | 'Medium' | 'High';
   stage: 'I' | 'II' | 'III' | 'IV' | ''; // Allow empty string for no cancer detected
   detectedAt: string;
+  // Dataset information for reviewers
+  datasetInfo?: {
+    usesRealData: boolean;
+    dataSource: string;
+    modelType: string;
+  };
 }
 
 export interface Medication {
@@ -109,6 +115,13 @@ export interface SHAPExplanation {
   topRiskFactors: FeatureContribution[];
   topProtectiveFactors: FeatureContribution[];
   summary: string;
+  // Dataset information
+  datasetInfo?: {
+    usesRealData: boolean;
+    dataSource: string;
+    modelType: string;
+    message: string;
+  };
 }
 
 export interface FeatureContribution {

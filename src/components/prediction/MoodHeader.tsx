@@ -8,7 +8,7 @@ interface MoodHeaderProps {
 }
 
 export function MoodHeader({ cancerDetected, stage }: MoodHeaderProps) {
-  const getMoodStyling = () => {
+  const getMoodStyling = (): void => {
     if (!cancerDetected) {
       return {
         celebrationIcon: <Sparkles className="h-12 w-12 text-green-500 animate-bounce" />,

@@ -20,7 +20,7 @@ interface SHAPExplanationProps {
 }
 
 export function SHAPExplanationComponent({ explanation }: SHAPExplanationProps) {
-  const renderFeatureContribution = (contribution: FeatureContribution, index: number) => {
+  const renderFeatureContribution = (contribution: FeatureContribution, index: number): void => {
     const isRisk = contribution.impact === 'Increases Risk';
     const barWidth = Math.abs(contribution.contributionPct);
     
@@ -68,7 +68,7 @@ export function SHAPExplanationComponent({ explanation }: SHAPExplanationProps) 
     );
   };
 
-  const renderWaterfallChart = () => {
+  const renderWaterfallChart = (): void => {
     const sortedContributions = [...explanation.featureContributions]
       .sort((a, b) => Math.abs(b.shapValue) - Math.abs(a.shapValue))
       .slice(0, 8);

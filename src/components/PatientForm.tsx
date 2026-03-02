@@ -108,7 +108,7 @@ export function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
     },
   });
 
-  const handleSubmit = (data: PatientFormData) => {
+  const handleSubmit = (data: PatientFormData): void => {
     const patientData: PatientData = {
       age: data.age,
       gender: data.gender,
@@ -184,7 +184,8 @@ export function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
                         <Input 
                           type="number" 
                           {...field} 
-                          onChange={(e) => field.onChange(parseInt(e.target.value))}
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
                         />
                       </FormControl>
                       <FormMessage />
@@ -398,7 +399,8 @@ export function PatientForm({ onSubmit, isLoading }: PatientFormProps) {
                           min="3" 
                           max="12"
                           {...field} 
-                          onChange={(e) => field.onChange(parseInt(e.target.value))}
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : '')}
                         />
                       </FormControl>
                       <FormMessage />

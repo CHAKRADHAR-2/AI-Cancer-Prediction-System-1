@@ -47,7 +47,7 @@ export function DatasetViewer() {
     loadDatasetCatalog();
   }, []);
 
-  const loadDatasetCatalog = async () => {
+  const loadDatasetCatalog = async (): Promise<void> => {
     try {
       setLoading(true);
       const mockCatalog: DatasetCatalog = {
@@ -233,7 +233,7 @@ export function DatasetViewer() {
     });
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: string): void => {
     switch (status) {
       case 'success':
         return <CheckCircle className="h-4 w-4 text-green-500" />;
@@ -244,7 +244,7 @@ export function DatasetViewer() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string): void => {
     switch (status) {
       case 'success':
         return <Badge variant="default" className="bg-green-100 text-green-800">Real Data</Badge>;
@@ -255,7 +255,7 @@ export function DatasetViewer() {
     }
   };
 
-  const groupDatasetsByCancerType = (datasets: Dataset[]) => {
+  const groupDatasetsByCancerType = (datasets: Dataset[]): void => {
     const grouped: { [key: string]: Dataset[] } = {};
     datasets.forEach(dataset => {
       const type = dataset.cancer_type;
@@ -267,7 +267,7 @@ export function DatasetViewer() {
     return grouped;
   };
 
-  const calculateStats = (datasets: Dataset[]) => {
+  const calculateStats = (datasets: Dataset[]): void => {
     const totalSamples = datasets.reduce((sum, d) => sum + d.samples, 0);
     const totalSize = datasets.reduce((sum, d) => sum + d.file_size, 0);
     const realDatasets = datasets.filter(d => d.status === 'success').length;
