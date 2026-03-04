@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "ai-cancer-prediction",
+    "ai-cancer": "ai-cancer-prediction"
+  },
+  "targets": {},
+  "etags": {}
+}
