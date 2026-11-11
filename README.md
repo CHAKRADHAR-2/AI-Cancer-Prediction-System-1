@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 # AI Cancer Prediction System
 
 A comprehensive healthcare analytics platform that leverages artificial intelligence and machine learning algorithms to provide advanced cancer risk assessment and personalized healthcare recommendations.
